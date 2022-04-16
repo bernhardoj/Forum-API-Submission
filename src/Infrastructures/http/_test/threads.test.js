@@ -517,7 +517,7 @@ describe('/threads endpoint', () => {
 				// Arrange
 				const threadId = 'thread-123';
 				const owner = registerData.addedUser.id;
-				ThreadsTableTestHelper.addThread({ id: threadId, owner });
+				await ThreadsTableTestHelper.addThread({ id: threadId, owner });
 				const requestPayload = {
 					content: 'Thread Reply'
 				};
