@@ -9,10 +9,23 @@ class ThreadUseCase {
 
 	async getThreadDetail(threadId) {
 		await this.threadRepository.verifyThreadExists(threadId);
-		const [thread, comments] = await Promise.all([
+		let [thread, comments] = await Promise.all([
 			this.threadRepository.getThread(threadId), 
 			this.threadRepository.getThreadComments(threadId)
 		]);
+		comments = comments.map(comment => ({
+			id: comment.id,
+			date: comment.date,
+			username: comment.username,
+			content: comment.isDelete ? '**komentar telah dihapus**' : comment.content,
+			replies: comment.replies?.map(reply => ({
+				id: reply.id,
+				username: reply.username,
+				date: reply.date, 
+				content: reply.isDelete ? '**balasan telah dihapus**' : reply.content
+			})) ?? [],
+			likeCount: comment.likeCount
+		}));
 		return { ...thread, comments };
 	}
 }

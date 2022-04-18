@@ -104,22 +104,27 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 				tc.id, 
 				tc.date, 
 				u.username, 
-				CASE WHEN tc."isDelete" = true THEN '**komentar telah dihapus**' ELSE tc.content END as content,
+				tc.content,
+				tc."isDelete",
 				ARRAY(
 					SELECT json_build_object(
 						'id', tcr.id, 
 						'username', u.username, 
-						'content', CASE WHEN tcc."isDelete" = true THEN '**balasan telah dihapus**' ELSE tcc.content END, 
+						'content', tcc.content,
+						'isDelete', tcc."isDelete", 
 						'date', tcc.date)
 					FROM thread_comment_replies tcr
 					JOIN thread_comments tcc ON tcc.id = "commentId"
 					JOIN users u ON u.id = tcc.owner	
 					WHERE tcr."replyTo" = tc.id
 					ORDER BY tcc.date ASC
-				) as replies
+				) as replies,
+				COUNT(tcl."commentId")::int as "likeCount"
 			FROM thread_comments tc
 			JOIN users u ON tc.owner = u.id
+			LEFT JOIN thread_comment_likes tcl ON tcl."commentId" = tc.id
 			WHERE tc."threadId" = $1 AND "isReply" = false
+			GROUP BY tc.id, u.username
 			ORDER BY date ASC`,
 			values: [threadId]
 		};
@@ -155,6 +160,34 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 			client.release();
 		}
 		return { ...commentResult.rows[0], ...replyResult.rows[0] };
+	}
+
+	async isLiked(commentId, userId) {
+		const query = {
+			text: 'SELECT * FROM thread_comment_likes WHERE "commentId" = $1 AND "userId" = $2',
+			values: [commentId, userId]
+		};
+		const result = await this.pool.query(query);
+
+		return result.rowCount !== 0;
+	}
+
+	async addCommentLike(commentId, userId) {
+		const query = {
+			text: 'INSERT INTO thread_comment_likes VALUES($1, $2)',
+			values: [commentId, userId]
+		};
+
+		await this.pool.query(query);
+	}
+
+	async deleteCommentLike(commentId, userId) {
+		const query = {
+			text: 'DELETE FROM thread_comment_likes WHERE "commentId" = $1 AND "userId" = $2',
+			values: [commentId, userId]
+		};
+
+		await this.pool.query(query);
 	}
 }
 

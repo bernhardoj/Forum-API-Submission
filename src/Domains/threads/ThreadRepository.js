@@ -35,7 +35,19 @@ class ThreadRepository {
 		throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
 	}
 
-	async deleteComment(threadId, commentId) {
+	async deleteComment(commentId) {
+		throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+	}
+
+	async isLiked(commentId, userId) {
+		throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+	}
+
+	async addCommentLike(commentId, userId) {
+		throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+	}
+
+	async deleteCommentLike(commentId, userId) {
 		throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
 	}
 }

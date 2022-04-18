@@ -388,7 +388,8 @@ describe('/threads endpoint', () => {
 								content: comment.content,
 								date: comment.date,
 								username: user.username,
-								replies: []
+								replies: [],
+								likeCount: 0
 							}
 						]
 					}
@@ -669,6 +670,104 @@ describe('/threads endpoint', () => {
 				const response = await server.inject({
 					method: 'DELETE',
 					url: '/threads/thread-123/comments/comment-123/replies/reply-123',
+					headers: {
+						'Authorization': `Bearer ${loginData.accessToken}`
+					}
+				});
+	
+				// Assert
+				const responseJson = JSON.parse(response.payload);
+				expect(response.statusCode).toEqual(404);
+				expect(responseJson).toStrictEqual(expectedResponse);
+			});
+		});
+	});
+	
+	describe('when PUT /threads/{threadId}/comments/{commentId}/likes', () => {
+		it('should response 401 if no auth', async () => {
+			// Arrange
+			const server = await createServer(container);
+
+			// Action
+			const response = await server.inject({
+				method: 'PUT',
+				url: '/threads/thread-123/comments/comment-123/likes'
+			});
+
+			// Assert
+			expect(response.statusCode).toEqual(401);
+		});
+
+		describe('with authentication', () => {
+			let registerData, loginData;
+			beforeEach(async () => {
+				[registerData, loginData] = await login();
+			});
+
+			it('should response 200 and add/remove like', async () => {
+				// Arrange
+				const threadId = 'thread-123';
+				const commentId = 'comment-123';
+				await ThreadsTableTestHelper.addThread({ id: threadId, owner: registerData.addedUser.id });
+				await ThreadsTableTestHelper.addComment({ id: commentId, threadId, owner: registerData.addedUser.id });
+				const server = await createServer(container);
+				const expectedResponse = {
+					status: 'success'
+				};
+				
+				// Action
+				const response = await server.inject({
+					method: 'PUT',
+					url: `/threads/${threadId}/comments/${commentId}/likes`,
+					headers: {
+						'Authorization': `Bearer ${loginData.accessToken}`
+					}
+				});
+	
+				// Assert
+				const responseJson = JSON.parse(response.payload);
+				expect(response.statusCode).toEqual(200);
+				expect(responseJson).toStrictEqual(expectedResponse);
+			});
+
+			it('should response 404 if thread not exist', async () => {
+				// Arrange
+				const server = await createServer(container);
+				
+				const expectedResponse = {
+					status: 'fail',
+					message: 'thread tidak dapat ditemukan'
+				};
+				// Action
+				const response = await server.inject({
+					method: 'PUT',
+					url: '/threads/thread-123/comments/comment-123/likes',
+					headers: {
+						'Authorization': `Bearer ${loginData.accessToken}`
+					}
+				});
+	
+				// Assert
+				const responseJson = JSON.parse(response.payload);
+				expect(response.statusCode).toEqual(404);
+				expect(responseJson).toStrictEqual(expectedResponse);
+			});
+
+			it('should response 404 if comment not exist', async () => {
+				// Arrange
+				const threadId = 'thread-123';
+				const owner = registerData.addedUser.id;
+				await ThreadsTableTestHelper.addThread({ id: threadId, owner });
+				const server = await createServer(container);
+				
+				const expectedResponse = {
+					status: 'fail',
+					message: 'komentar tidak dapat ditemukan'
+				};
+				// Action
+				const response = await server.inject({
+					method: 'PUT',
+					url: `/threads/${threadId}/comments/comment-123/likes`,
 					headers: {
 						'Authorization': `Bearer ${loginData.accessToken}`
 					}

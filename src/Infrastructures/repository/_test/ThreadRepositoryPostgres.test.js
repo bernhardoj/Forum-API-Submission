@@ -245,7 +245,8 @@ describe('ThreadRepositoryPostgres', () => {
 				content: 'Thread Comment 1',
 				owner: user.id,
 				threadId: thread.id,
-				date: '2022-08-04T19:20:33.555Z'
+				date: '2022-08-04T19:20:33.555Z',
+				isDelete: false
 			};
 			const comment2 = {
 				id: 'comment-234',
@@ -263,6 +264,7 @@ describe('ThreadRepositoryPostgres', () => {
 				owner: user.id,
 				threadId: thread.id,
 				date: '2022-08-05T19:20:33.555Z',
+				isDelete: false
 			};
 			const reply2 = {
 				id: 'reply-234',
@@ -280,33 +282,40 @@ describe('ThreadRepositoryPostgres', () => {
 			await ThreadsTableTestHelper.addComment(comment2);
 			await ThreadsTableTestHelper.addReply(reply1);
 			await ThreadsTableTestHelper.addReply(reply2);
+			await ThreadsTableTestHelper.addLike({ commentId: comment1.id, userId: comment1.owner });
 			const expectedComments = [
 				{
 					id: comment1.id,
 					content: comment1.content,
 					date: comment1.date,
 					username: user.username,
+					isDelete: comment1.isDelete,
 					replies: [
 						{
 							id: reply1.id,
 							content: reply1.content,
 							date: reply1.date,
-							username: user.username
+							username: user.username,
+							isDelete: reply1.isDelete
 						},
 						{
 							id: reply2.id,
-							content: '**balasan telah dihapus**',
+							content: reply2.content,
 							date: reply2.date,
-							username: user.username
+							username: user.username,
+							isDelete: reply2.isDelete
 						}
-					]
+					],
+					likeCount: 1
 				},
 				{
 					id: comment2.id,
-					content: '**komentar telah dihapus**',
+					content: comment2.content,
 					date: comment2.date,
 					username: user.username,
-					replies: []
+					isDelete: comment2.isDelete,
+					replies: [],
+					likeCount: 0
 				},
 			];
 			const fakeIdGenerator = () => '123';
@@ -364,6 +373,88 @@ describe('ThreadRepositoryPostgres', () => {
 			// Assert
 			const reply = await ThreadsTableTestHelper.findCommentById(commentReplyId);
 			expect(reply[0].isDelete).toEqual(true);
+		});
+	});
+
+	describe('isLiked function', () => {
+		it('should return true when liked', async () => {
+			// Arrange
+			const owner = 'user-123';
+			const threadId = 'thread-123';
+			const commentId = 'comment-123';
+			await UsersTableTestHelper.addUser({ id: owner });
+			await ThreadsTableTestHelper.addThread({ id: threadId, owner });
+			await ThreadsTableTestHelper.addComment({ id: commentId, threadId, owner });
+			await ThreadsTableTestHelper.addLike({ commentId, userId: owner });
+			const fakeIdGenerator = () => '123';
+			const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+			// Action
+			const isLiked = await threadRepositoryPostgres.isLiked(commentId, owner);
+
+			// Assert
+			expect(isLiked).toEqual(true);
+		});
+
+		it('should return false when not liked', async () => {
+			// Arrange
+			const owner = 'user-123';
+			const threadId = 'thread-123';
+			const commentId = 'comment-123';
+			await UsersTableTestHelper.addUser({ id: owner });
+			await ThreadsTableTestHelper.addThread({ id: threadId, owner });
+			await ThreadsTableTestHelper.addComment({ id: commentId, threadId, owner });
+			const fakeIdGenerator = () => '123';
+			const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+			// Action
+			const isLiked = await threadRepositoryPostgres.isLiked(commentId, owner);
+
+			// Assert
+			expect(isLiked).toEqual(false);
+		});
+	});
+
+	describe('addCommentLike function', () => {
+		it('should successfully add like to a comment', async () => {
+			// Arrange
+			const owner = 'user-123';
+			const threadId = 'thread-123';
+			const commentId = 'comment-123';
+			await UsersTableTestHelper.addUser({ id: owner });
+			await ThreadsTableTestHelper.addThread({ id: threadId, owner });
+			await ThreadsTableTestHelper.addComment({ id: commentId, threadId, owner });
+			const fakeIdGenerator = () => '123';
+			const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+			// Action
+			await threadRepositoryPostgres.addCommentLike(commentId, owner);
+
+			// Assert
+			const like1 = await ThreadsTableTestHelper.findLike(commentId, owner);
+			expect(like1).toHaveLength(1);
+		});
+	});
+
+	describe('deleteCommentLike function', () => {
+		it('should successfully delete like from a comment', async () => {
+			// Arrange
+			const owner = 'user-123';
+			const threadId = 'thread-123';
+			const commentId = 'comment-123';
+			await UsersTableTestHelper.addUser({ id: owner });
+			await ThreadsTableTestHelper.addThread({ id: threadId, owner });
+			await ThreadsTableTestHelper.addComment({ id: commentId, threadId, owner });
+			await ThreadsTableTestHelper.addLike({ commentId, userId: owner });
+			const fakeIdGenerator = () => '123';
+			const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+			// Action
+			await threadRepositoryPostgres.deleteCommentLike(commentId, owner);
+
+			// Assert
+			const like1 = await ThreadsTableTestHelper.findLike(commentId, owner);
+			expect(like1).toHaveLength(0);
 		});
 	});
 });

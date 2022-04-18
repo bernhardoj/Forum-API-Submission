@@ -13,6 +13,14 @@ class CommentUseCase {
 		await this.threadRepository.verifyCommentOwner(commentId, userId);
 		await this.threadRepository.deleteComment(commentId);
 	}
+
+	async likeComment(threadId, commentId, userId) {
+		await this.threadRepository.verifyThreadExists(threadId);
+		await this.threadRepository.verifyCommentExists(commentId);
+		const isLiked = await this.threadRepository.isLiked(commentId, userId);
+		if (isLiked) await this.threadRepository.deleteCommentLike(commentId, userId);
+		else await this.threadRepository.addCommentLike(commentId, userId);
+	}
 }
 
 module.exports = CommentUseCase;
