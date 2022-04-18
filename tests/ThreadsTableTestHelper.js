@@ -101,6 +101,9 @@ const ThreadsTableTestHelper = {
 
 	async cleanTable() {
 		await pool.query('DELETE FROM threads WHERE 1=1');
+		await pool.query('DELETE FROM thread_comments WHERE 1=1');
+		await pool.query('DELETE FROM thread_comment_replies WHERE 1=1');
+		await pool.query('DELETE FROM thread_comment_likes WHERE 1=1');
 	},
 };
 
