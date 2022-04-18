@@ -118,10 +118,13 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 					JOIN users u ON u.id = tcc.owner	
 					WHERE tcr."replyTo" = tc.id
 					ORDER BY tcc.date ASC
-				) as replies
+				) as replies,
+				COUNT(tcl."commentId")::int as "likeCount"
 			FROM thread_comments tc
 			JOIN users u ON tc.owner = u.id
+			LEFT JOIN thread_comment_likes tcl ON tcl."commentId" = tc.id
 			WHERE tc."threadId" = $1 AND "isReply" = false
+			GROUP BY tc.id, u.username
 			ORDER BY date ASC`,
 			values: [threadId]
 		};

@@ -282,6 +282,7 @@ describe('ThreadRepositoryPostgres', () => {
 			await ThreadsTableTestHelper.addComment(comment2);
 			await ThreadsTableTestHelper.addReply(reply1);
 			await ThreadsTableTestHelper.addReply(reply2);
+			await ThreadsTableTestHelper.addLike({ commentId: comment1.id, userId: comment1.owner });
 			const expectedComments = [
 				{
 					id: comment1.id,
@@ -304,7 +305,8 @@ describe('ThreadRepositoryPostgres', () => {
 							username: user.username,
 							isDelete: reply2.isDelete
 						}
-					]
+					],
+					likeCount: 1
 				},
 				{
 					id: comment2.id,
@@ -312,7 +314,8 @@ describe('ThreadRepositoryPostgres', () => {
 					date: comment2.date,
 					username: user.username,
 					isDelete: comment2.isDelete,
-					replies: []
+					replies: [],
+					likeCount: 0
 				},
 			];
 			const fakeIdGenerator = () => '123';
