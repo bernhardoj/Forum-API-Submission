@@ -388,7 +388,8 @@ describe('/threads endpoint', () => {
 								content: comment.content,
 								date: comment.date,
 								username: user.username,
-								replies: []
+								replies: [],
+								likeCount: 0
 							}
 						]
 					}

@@ -18,8 +18,8 @@ class CommentUseCase {
 		await this.threadRepository.verifyThreadExists(threadId);
 		await this.threadRepository.verifyCommentExists(commentId);
 		const isLiked = await this.threadRepository.isLiked(commentId, userId);
-		if (isLiked) await this.threadRepository.addCommentLike(commentId, userId);
-		else await this.threadRepository.deleteCommentLike(commentId, userId);
+		if (isLiked) await this.threadRepository.deleteCommentLike(commentId, userId);
+		else await this.threadRepository.addCommentLike(commentId, userId);
 	}
 }
 

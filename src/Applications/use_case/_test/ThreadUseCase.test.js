@@ -61,7 +61,8 @@ describe('ThreadUseCase', () => {
 							date: '2022-08-05T19:20:33.555Z',
 							content: 'Thread Reply 1'
 						}
-					]
+					],
+					likeCount: 5
 				},
 				{
 					id: 'comment-234',
@@ -75,14 +76,16 @@ describe('ThreadUseCase', () => {
 							date: '2022-08-05T19:20:33.555Z',
 							content: '**balasan telah dihapus**'
 						}
-					]
+					],
+					likeCount: 2
 				},
 				{
 					id: 'comment-345',
 					content: 'Thread comment 3',
 					date: '2022-08-05T19:20:33.555Z',
 					username: 'dicoding',
-					replies: []
+					replies: [],
+					likeCount: 0
 				},
 			];
 			
@@ -112,7 +115,8 @@ describe('ThreadUseCase', () => {
 								content: 'Thread Reply 1',
 								isDelete: false
 							}
-						]
+						],
+						likeCount: 5
 					},
 					{
 						id: 'comment-234',
@@ -128,14 +132,16 @@ describe('ThreadUseCase', () => {
 								content: 'Thread reply 2',
 								isDelete: true
 							}
-						]
+						],
+						likeCount: 2
 					},
 					{
 						id: 'comment-345',
 						content: 'Thread comment 3',
 						date: '2022-08-05T19:20:33.555Z',
 						username: 'dicoding',
-						isDelete: false
+						isDelete: false,
+						likeCount: 0
 					},
 				]));
         

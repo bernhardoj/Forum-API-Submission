@@ -23,7 +23,8 @@ class ThreadUseCase {
 				username: reply.username,
 				date: reply.date, 
 				content: reply.isDelete ? '**balasan telah dihapus**' : reply.content
-			})) ?? []
+			})) ?? [],
+			likeCount: comment.likeCount
 		}));
 		return { ...thread, comments };
 	}
