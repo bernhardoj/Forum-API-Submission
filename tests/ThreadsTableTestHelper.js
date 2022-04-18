@@ -80,6 +80,25 @@ const ThreadsTableTestHelper = {
 		return result.rows;
 	},
 
+	async addLike({commentId = 'comment-123', userId = 'user-123'}) {
+		const query = {
+			text: 'INSERT INTO thread_comment_likes VALUES($1, $2)',
+			values: [commentId, userId],
+		};
+
+		await pool.query(query);
+	},
+
+	async findLike(commentId, userId) {
+		const query = {
+			text: 'SELECT * FROM thread_comment_likes WHERE "commentId" = $1 AND "userId" = $2',
+			values: [commentId, userId],
+		};
+
+		const result = await pool.query(query);
+		return result.rows;
+	},
+
 	async cleanTable() {
 		await pool.query('DELETE FROM threads WHERE 1=1');
 	},

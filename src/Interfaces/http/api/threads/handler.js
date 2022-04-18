@@ -12,6 +12,7 @@ class ThreadsHandler {
 		this.getThreadHandler = this.getThreadHandler.bind(this);
 		this.deleteCommentThreadHandler = this.deleteCommentThreadHandler.bind(this);
 		this.deleteReplyCommentHandler = this.deleteReplyCommentHandler.bind(this);
+		this.likeCommentHandler = this.likeCommentHandler.bind(this);
 	}
 
 	async postThreadHandler(request, h) {
@@ -96,6 +97,17 @@ class ThreadsHandler {
 		const { replyId } = request.params;
 		const userId = request.auth.credentials.id;
 		await replyUseCase.deleteReply(replyId, userId);
+
+		return {
+			status: 'success'
+		};
+	}
+
+	async likeCommentHandler(request) {
+		const commentUseCase = this.container.getInstance(CommentUseCase.name);
+		const { threadId, commentId } = request.params;
+		const userId = request.auth.credentials.id;
+		await commentUseCase.likeComment(threadId, commentId, userId);
 
 		return {
 			status: 'success'

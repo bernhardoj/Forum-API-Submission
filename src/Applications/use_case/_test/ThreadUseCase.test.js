@@ -54,7 +54,8 @@ describe('ThreadUseCase', () => {
 					id: commentId,
 					content: 'Thread comment',
 					date: '2022-08-05T19:20:33.555Z',
-					username: 'dicoding'
+					username: 'dicoding',
+					replies: []
 				},
 			];
 

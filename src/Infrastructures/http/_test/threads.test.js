@@ -766,7 +766,7 @@ describe('/threads endpoint', () => {
 				// Action
 				const response = await server.inject({
 					method: 'PUT',
-					url: `/threads/${threadId}/comments/comment-123/replies`,
+					url: `/threads/${threadId}/comments/comment-123/likes`,
 					headers: {
 						'Authorization': `Bearer ${loginData.accessToken}`
 					}

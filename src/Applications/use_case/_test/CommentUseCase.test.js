@@ -62,4 +62,70 @@ describe('CommentUseCase', () => {
 			expect(mockThreadRepository.deleteComment).toBeCalledWith(commentId);
 		});
 	});
+
+	describe('likeComment function', () => {
+		it('should orchestrating the like comment action correctly (add like)', async () => {
+			// Arrange
+			const owner = 'user-123';
+			const threadId = 'thread-123';
+			const commentId = 'comment-123';
+        
+			/** creating dependency of use case */
+			const mockThreadRepository = new ThreadRepository();
+        
+			/** mocking needed function */
+			mockThreadRepository.verifyThreadExists = jest.fn()
+				.mockImplementation(() => Promise.resolve());
+			mockThreadRepository.verifyCommentExists = jest.fn()
+				.mockImplementation(() => Promise.resolve());
+			mockThreadRepository.isLiked = jest.fn()
+				.mockImplementation(() => Promise.resolve(true));
+			mockThreadRepository.addCommentLike = jest.fn()
+				.mockImplementation(() => Promise.resolve());
+        
+			/** creating use case instance */
+			const commentUseCase = new CommentUseCase(mockThreadRepository);
+        
+			// Action
+			await commentUseCase.likeComment(threadId, commentId, owner);
+        
+			// Assert
+			expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(threadId);
+			expect(mockThreadRepository.verifyCommentExists).toBeCalledWith(commentId);
+			expect(mockThreadRepository.isLiked).toBeCalledWith(commentId, owner);
+			expect(mockThreadRepository.addCommentLike).toBeCalledWith(commentId, owner);
+		});
+
+		it('should orchestrating the like comment action correctly (remove like)', async () => {
+			// Arrange
+			const owner = 'user-123';
+			const threadId = 'thread-123';
+			const commentId = 'comment-123';
+        
+			/** creating dependency of use case */
+			const mockThreadRepository = new ThreadRepository();
+        
+			/** mocking needed function */
+			mockThreadRepository.verifyThreadExists = jest.fn()
+				.mockImplementation(() => Promise.resolve());
+			mockThreadRepository.verifyCommentExists = jest.fn()
+				.mockImplementation(() => Promise.resolve());
+			mockThreadRepository.isLiked = jest.fn()
+				.mockImplementation(() => Promise.resolve(false));
+			mockThreadRepository.deleteCommentLike = jest.fn()
+				.mockImplementation(() => Promise.resolve());
+        
+			/** creating use case instance */
+			const commentUseCase = new CommentUseCase(mockThreadRepository);
+        
+			// Action
+			await commentUseCase.likeComment(threadId, commentId, owner);
+        
+			// Assert
+			expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(threadId);
+			expect(mockThreadRepository.verifyCommentExists).toBeCalledWith(commentId);
+			expect(mockThreadRepository.isLiked).toBeCalledWith(commentId, owner);
+			expect(mockThreadRepository.deleteCommentLike).toBeCalledWith(commentId, owner);
+		});
+	});
 });
